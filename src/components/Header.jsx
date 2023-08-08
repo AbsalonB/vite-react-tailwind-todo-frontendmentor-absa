@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import MoonIcon from "./icons/MoonIcon";
 import SunIcon from './icons/SunIcon';
-const initialStateDarkMode = localStorage.theme === "dark" ||
-    (!("theme" in localStorage) &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches);
+const initialStateDarkMode = localStorage.theme === "dark";
 const Header = () => {
     const [darkMode, setDarkMode] = useState(initialStateDarkMode);
 
