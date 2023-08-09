@@ -22,7 +22,7 @@ const TodoItem = React.forwardRef(
                 >
                     {completed && <CheckIcon />}
                 </button>
-                <p
+                <p onClick={() => updateTodo(id)}
                     className={`grow text-gray-600 transition-all duration-1000 dark:text-gray-400 ${
                         completed && "line-through"
                     }`}

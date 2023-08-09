@@ -7,9 +7,12 @@ import TodoList from "./components/TodoList";
 import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-const initialStateTodos = JSON.parse(localStorage.getItem("todos")) || [];
-
-//https://github.com/ymulenll/react-beautiful-dnd-demo/blob/master/src/App.js
+const initialStateTodos = JSON.parse(localStorage.getItem("todos")) || [
+    {id:1,title:'Go to the gym', completed:true,},
+    {id:2,title:'Complete course', completed:false,},
+    {id:3,title:'Complete task', completed:false,},
+];
+ 
 const reorder = (list, startIndex, endIndex) => {
     const result = [...list];
     const [removed] = result.splice(startIndex, 1);
@@ -101,16 +104,15 @@ const App = () => {
             <main className="container mx-auto mt-8 px-4 md:max-w-xl">
                 <TodoCreate createTodo={createTodo} />
 
-                {todos.length > 0 ? (
+                {
+                    todos.length > 0 &&
                     <TodoList
                         todos={filteredTodos()}
                         removeTodo={removeTodo}
                         updateTodo={updateTodo}
                         handleDragEnd={handleDragEnd}
-                    />
-                ) : (
-                    <p>Cargando...</p>
-                )}
+                    /> 
+                 }
 
                 <TodoComputed
                     computedItemsLeft={computedItemsLeft}
