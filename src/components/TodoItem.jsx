@@ -1,19 +1,40 @@
 import CrossIcon from "./icons/CrossIcon";
 import CheckIcon from "./icons/CheckIcon";
-const TodoItem = ({todo, removeTodo,completeTodo}) => {
-    const {id,title,completed} = todo; 
-    const gradient ='bg-gradient-to-r from-blue-400 to-purple-500 flex justify-center items-center';
-    const blank='inline-block';
-    return (
-        <article className="flex gap-4 border-b-gray-400 border-b dark:bg-gray-800 transition duration-1000"> 
-            <button className={`flex-none rounded-full border-2 w-5 h-5 ${completed?gradient:blank}`}
-             onClick={e=>completeTodo(id)} >
-               { completed && <CheckIcon/>}
-            </button>
-            <p className={`text-gray-600 dark:text-gray-200 grow ${completed && 'line-through'}`}>{title}</p>
-            <button className="flex-noe" onClick={e=>removeTodo(id)}><CrossIcon/></button>
-        </article> 
-    );
-}
+import React from "react";
+
+const TodoItem = React.forwardRef(
+    ({ todo, removeTodo, updateTodo, ...props }, ref) => {
+        const { id, title, completed } = todo;
+
+        return (
+            <article
+                className="flex gap-4 border-b border-b-gray-400 "
+                ref={ref}
+                {...props}
+            >
+                <button
+                    className={`h-5 w-5 flex-none rounded-full border-2 ${
+                        completed
+                            ? "grid place-items-center bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+                            : "inline-block"
+                    }`}
+                    onClick={() => updateTodo(id)}
+                >
+                    {completed && <CheckIcon />}
+                </button>
+                <p
+                    className={`grow text-gray-600 transition-all duration-1000 dark:text-gray-400 ${
+                        completed && "line-through"
+                    }`}
+                >
+                    {title}
+                </p>
+                <button className="flex-none" onClick={() => removeTodo(id)}>
+                    <CrossIcon />
+                </button>
+            </article>
+        );
+    }
+);
 
 export default TodoItem;

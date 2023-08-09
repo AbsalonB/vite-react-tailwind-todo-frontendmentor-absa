@@ -1,13 +1,40 @@
 import TodoItem from "./TodoItem";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-const TodoList = ({todos, removeTodo,completeTodo}) => { 
+const TodoList = ({ todos, removeTodo, updateTodo, handleDragEnd }) => {
     return (
-        <div className="bg-white rounded-md [&>article]:p-4 mt-8 overflow-hidden rounded-t-md transition duration-1000">
-            {
-               todos.map((todo)=>(<TodoItem key={todo.id} todo={todo} removeTodo={removeTodo} completeTodo={completeTodo}/>))  
-            }
-    </div>  
+        <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="todos">
+                {(droppableProvided) => (
+                    <div
+                        className="mt-8 overflow-hidden rounded-t-md bg-white transition-all duration-1000 dark:bg-gray-800 [&>article]:p-4"
+                        {...droppableProvided.droppableProps}
+                        ref={droppableProvided.innerRef}
+                    >
+                        {todos.map((todo, index) => (
+                            <Draggable
+                                key={todo.id}
+                                draggableId={`${todo.id}`}
+                                index={index}
+                            >
+                                {(provided) => (
+                                    <TodoItem
+                                        {...provided.draggableProps}
+                                        ref={provided.innerRef}
+                                        {...provided.dragHandleProps}
+                                        todo={todo}
+                                        removeTodo={removeTodo}
+                                        updateTodo={updateTodo}
+                                    />
+                                )}
+                            </Draggable>
+                        ))}
+                        {droppableProvided.placeholder}
+                    </div>
+                )}
+            </Droppable>
+        </DragDropContext>
     );
-}
+};
 
 export default TodoList;

@@ -1,90 +1,130 @@
 import CrossIcon from "./components/icons/CrossIcon";
 import Header from "./components/Header";
-import TodoCreate from "./components/TodoCreate";
-import Todolist from "./components/TodoList";
+import TodoCreate from "./components/TodoCreate"; 
 import TodoComputed from "./components/TodoComputed";
 import TodoFilter from "./components/TodoFilter";
+import TodoList from "./components/TodoList";
 import { useEffect, useState } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-const initialStateTodos = JSON.parse(localStorage.getItem('todos'))  
-|| [
-    {id:1,title:'Go to the gym', completed:true,},
-    {id:2,title:'Complete course', completed:false,},
-    {id:3,title:'Complete task', completed:false,},
-];
+const initialStateTodos = JSON.parse(localStorage.getItem("todos")) || [];
 
-const App=()=>{
-    const [todos,setTodo] = useState(initialStateTodos);
+//https://github.com/ymulenll/react-beautiful-dnd-demo/blob/master/src/App.js
+const reorder = (list, startIndex, endIndex) => {
+    const result = [...list];
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
 
-    useEffect(()=>{
-        localStorage.setItem('todos',JSON.stringify(todos)); 
-    },[todos]);
+    return result;
+};
 
-    const [filter,setFilter] = useState("all");
+const App = () => {
+    const [todos, setTodos] = useState(initialStateTodos);
 
-    const createTodo =(title)=>{
+    useEffect(() => {
+        localStorage.setItem("todos", JSON.stringify(todos));
+    }, [todos]);
+
+    const handleDragEnd = (result) => {
+        const { destination, source } = result;
+        if (!destination) return;
+        if (
+            source.index === destination.index &&
+            source.droppableId === destination.droppableId
+        )
+            return;
+
+        setTodos((prevTasks) =>
+            reorder(prevTasks, source.index, destination.index)
+        );
+    };
+
+    const createTodo = (title) => {
         const newTodo = {
-            id: Date.now(),
+            id: `${Date.now()}`,
             title: title.trim(),
-            completed:false,
-        }
-        setTodo([...todos,newTodo]);
-    }
+            completed: false,
+        };
 
-    const removeTodo =(id)=>{
-        setTodo(todos.filter((todo)=>todo.id!==id));
-    }
+        setTodos([...todos, newTodo]);
+    };
 
-    const completeTodo = (id) =>{
-        setTodo(todos.map((todo)=>{
-            if(todo.id===id){
-                todo.completed=!todo.completed;
-            }
-            return todo;
-        }))
-    }
+    const removeTodo = (id) => {
+        setTodos(todos.filter((todo) => todo.id !== id));
+    };
 
-    const clearCompleted = ()=>{
-        setTodo(todos.filter((todo)=>!todo.completed));
-    }
+    const updateTodo = (id) => {
+        setTodos(
+            todos.map((todo) =>
+                todo.id === id ? { ...todo, completed: !todo.completed } : todo
+            )
+        );
+    };
 
-    const getLeftItems = todos.filter((todo)=>!todo.completed).length;
+    const computedItemsLeft = todos.filter((todo) => !todo.completed).length;
 
+    const clearCompleted = () => {
+        setTodos(todos.filter((todo) => !todo.completed));
+    };
 
-    const filteredTodos = ()=>{
-        switch(filter){
+    const [filter, setFilter] = useState("all");
+
+    const changeFilter = (filter) => setFilter(filter);
+
+    const filteredTodos = () => {
+        switch (filter) {
             case "all":
                 return todos;
             case "active":
-                return todos.filter((todo)=>!todo.completed);
+                return todos.filter((todo) => !todo.completed);
             case "completed":
-                return todos.filter((todo)=>todo.completed);
+                return todos.filter((todo) => todo.completed);
             default:
                 return todos;
         }
-    }
-
-    const changeFilter = (filter)=>setFilter(filter);
+    };
 
     return (
-        <>
-        <div className="dark:bg-gray-800 main-h-screen 
-        bg-[url('./assets/images/bg-mobile-light.jpg')] 
-        bg-no-repeat bg-contain bg-gray-100 
-        transition duration-1000 min-h-screen
-        md:bg-[url('./assets/images/bg-desktop-light.jpg')]
-        md:dark:bg-[url('./assets/images/bg-desktop-dark.jpg')]
-       ">       
+        <div className="min-h-screen
+             bg-gray-300 bg-mobile-light 
+             bg-contain bg-no-repeat 
+             transition-all duration-1000
+             dark:bg-gray-900 
+             dark:bg-mobile-dark 
+             md:bg-desktop-light md:dark:bg-desktop-dark
+             bg-[url('./assets/images/bg-mobile-light.jpg')]  
+             md:bg-[url('./assets/images/bg-desktop-light.jpg')]
+             md:dark:bg-[url('./assets/images/bg-desktop-dark.jpg')]
+             ">
             <Header />
-            <main className="container mx-auto px-4 mt-4 transition duration-1000 md:max-w-xl">                
-                <TodoCreate createTodo={createTodo}/> 
-                <Todolist todos={filteredTodos()} removeTodo={removeTodo} completeTodo = {completeTodo}/> 
-                <TodoComputed getLeftItems={getLeftItems} clearCompleted={clearCompleted}/> 
-                <TodoFilter filteredTodos={filteredTodos} changeFilter={changeFilter} filter={filter}/>
+
+            <main className="container mx-auto mt-8 px-4 md:max-w-xl">
+                <TodoCreate createTodo={createTodo} />
+
+                {todos.length > 0 ? (
+                    <TodoList
+                        todos={filteredTodos()}
+                        removeTodo={removeTodo}
+                        updateTodo={updateTodo}
+                        handleDragEnd={handleDragEnd}
+                    />
+                ) : (
+                    <p>Cargando...</p>
+                )}
+
+                <TodoComputed
+                    computedItemsLeft={computedItemsLeft}
+                    clearCompleted={clearCompleted}
+                />
+
+                <TodoFilter changeFilter={changeFilter} filter={filter} />
             </main>
-            <p className="text-center mt-8 dark:text-gray-200 transition duration-1000">Drag and drog to reorder list</p>
+
+            <footer className="mt-8 text-center dark:text-gray-400">
+                Drag and drop to reorder list
+            </footer>
         </div>
-        </>)
-}
+    );
+};
 
 export default App;
